@@ -1,0 +1,106 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="form-group">
+            <label for="demo_overview_minimal">Select Type of Properties</label>
+            <select id="demo_overview_minimal" class="form-control" data-role="select-dropdown" data-profile="minimal">
+                <option value="allproperties" selected>All Properties</option>
+                <option value="1bedroomflats">1 Bedroom Flats</option>
+                <option value="2bedroomflats">2 Bedroom Flats</option>
+                <option value="2bedroomhouses">2 Bedroom Houses</option>
+                <option value="3bedroomflats">3 Bedroom Flats</option>
+                <option value="3bedroomhouses">3 Bedroom Houses</option>
+                <option value="4bedroomhouses">4 Bedroom Houses</option>
+            </select>
+        </div>
+    </div>
+    <div class="row" id ="allproperties">
+        {% include "graphic_allproperties.html" %}
+    </div>
+    <div class="row" id ="1bedroomflats">
+        {% include "graphic_1bedroomflats.html" %}
+    </div>
+    <div class="row" id ="2bedroomflats">
+        {% include "graphic_2bedroomflats.html" %}
+    </div>
+    <div class="row" id ="2bedroomhouses">
+        {% include "graphic_2bedroomhouses.html" %}
+    </div>
+    <div class="row" id ="3bedroomflats">
+        {% include "graphic_3bedroomflats.html" %}
+    </div>
+    <div class="row" id ="3bedroomhouses">
+        {% include "graphic_3bedroomhouses.html" %}
+    </div>
+    <div class="row" id ="4bedroomhouses">
+        {% include "graphic_4bedroomhouses.html" %}
+    </div>
+    <script>
+        const el = document.getElementById('demo_overview_minimal');
+
+        const allproperties = document.getElementById('allproperties');
+        const bf1 = document.getElementById('1bedroomflats');
+        const bf2 = document.getElementById('2bedroomflats');
+        const bh2 = document.getElementById('2bedroomhouses');
+        const bf3 = document.getElementById('3bedroomflats');
+        const bh3 = document.getElementById('3bedroomhouses');
+        const bf4 = document.getElementById('4bedroomhouses');
+
+        bf1.hidden = true;
+        bf2.hidden = true;
+        bh2.hidden = true;
+        bf3.hidden = true;
+        bh3.hidden = true;
+        bf4.hidden = true;
+
+        el.addEventListener('change', function handleChange(event) {
+            if (event.target.value === 'allproperties') {
+                allproperties.hidden = false;
+            } else {
+                allproperties.hidden = true;
+            }
+
+            if (event.target.value === '1bedroomflats') {
+                bf1.hidden = false;
+            } else {
+                bf1.hidden = true;
+            }
+
+            if (event.target.value === '2bedroomflats') {
+                bf2.hidden = false;
+            } else {
+                bf2.hidden = true;
+            }
+
+            if (event.target.value === '2bedroomhouses') {
+                bh2.hidden = false;
+            } else {
+                bh2.hidden = true;
+            }
+
+            if (event.target.value === '3bedroomflats') {
+                bf3.hidden = false;
+            } else {
+                bf3.hidden = true;
+            }
+
+            if (event.target.value === '3bedroomhouses') {
+                bh3.hidden = false;
+            } else {
+                bh3.hidden = true;
+            }
+
+            if (event.target.value === '4bedroomhouses') {
+                bf4.hidden = false;
+            } else {
+                bf4.hidden = true;
+            }
+
+        });
+     </script>
+</div>
+
+{% endblock %}

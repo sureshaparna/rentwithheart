@@ -1,0 +1,66 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="container-fluid c-bg-prim" style="height: 100px;">
+    <div class="row">
+        <div class="col-1">
+            <h1> </h1>
+        </div>
+        <div class="col-11">
+            <h1 class="font-weight-bold"> Rent with Heart </h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <h1> </h1>
+        </div>
+        <div class="col-11">
+            <h5 class="font-weight-bold"> We are here to help you find affordable suburbs you will love  </h5>
+        </div>
+    </div>
+  </div>
+<div class="container-fluid bg-img" style="height: 250px;box-shadow: 0px 0px 20px 12px #EAE8DC inset;">
+    
+</div>
+<div class="container-fluid c-bg-prim" style="padding-top: 100px;padding-bottom: 100px">
+    <div class="row">
+        <div class="col-2">
+            <h1> </h1>
+        </div>
+        <div class="col-4">
+            <div class="row">
+                <h1 class="font-weight-bold"> Home is more than just a roof over your head. </h1> 
+            </div>
+            <div class="row" style="padding-bottom:30px;">
+                <h5 class="c-text-prim">The rental crisis in Victoria has caused many families to struggle to find a suitable home. Many of us are considering moving to a different suburb where prices fit our budget, but there are many uncertainties at every step. 
+                </h5>
+            </div>
+            <div class="row" style="padding-bottom:30px;">
+                <h5 class="c-text-prim">
+                    Are there suitable schools for my children?
+                    How far away is this suburb from my workplace? My friends? My family?
+                    </h5>
+            </div>
+            <div class="row">
+                <h5 class="c-text-prim">
+                    Let us help you answer these questions and more. 
+                    Don't let the rental crisis keep you from living your best life!    
+                    </h5>
+            </div>
+            <div class="row">
+                <a href="{{ url_for('recommender') }}" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">See More</a>
+            </div>
+        </div>
+        <div class="col-1">
+            <h1> </h1>
+        </div>
+        <div class="col-3">
+            <img style="border-radius: 5%;" src="{{ url_for('static', filename='images/pic2.jpg') }}" alt="" >
+        </div>
+        <div class="col-2">
+            <h1> </h1>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

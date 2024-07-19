@@ -1,0 +1,37 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<div class="container-fluid c-bg-prim" style="height: 150px;">
+    <div class="row">
+        <div class="col-1">
+            <h1> </h1>
+        </div>
+        <div class="col-11">
+            <h1 class="font-weight-bold"> Forecasting Graph </h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <h1> </h1>
+        </div>
+        <div class="col-11">
+            <h5 class="font-weight-bold"> Display the historical trends  </h5>
+        </div>
+    </div>
+  </div>
+<div class="container-fluid bg-img-4" style="height: 400px;box-shadow: 0px 0px 20px 12px #EAE8DC inset;">
+    
+</div>
+<div class="container-fluid c-bg-prim" style="padding-top: 100px;padding-bottom: 100px">
+    <div class="row">
+        <div class="col-1">
+
+        </div>
+        <div class="col-10">
+            {% include "graphic_2bedroomflats.html" %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
