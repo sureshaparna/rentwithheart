@@ -34,7 +34,7 @@ app.layout = html.Div(children=[
             dcc.Dropdown(id="region_dropdown", searchable=False, value="Inner Eastern Melbourne",
                 options=[{'label': val.capitalize(), 'value': val} for val in historical_data["region"].unique()]
             )
-        ], style={"width": "100%"}),
+        ], style={"width": "100%"})
     ], style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "space-around", "gap": "30px", "margin": "10px 30px"}),
 
     html.Div(children=[

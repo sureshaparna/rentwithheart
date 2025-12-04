@@ -1,7 +1,7 @@
 # Importing Libraries
-from dash import Dash, dcc, html, Input, Output
-from plotly.express import data
 import pandas as pd
+from plotly.express import data
+from dash import Dash, dcc, html, Input, Output
 import dash_bootstrap_components as dbc
 
 # Reading Data File
@@ -84,4 +84,4 @@ def update_table(value):
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host="0.0.0.0", port=8002)
+    app.run(debug=False, host="0.0.0.0")
