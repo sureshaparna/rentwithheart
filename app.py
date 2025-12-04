@@ -357,4 +357,4 @@ def update_table(value):
 
 
 if __name__ == '__main__':
-    main_app.run(debug=True)
+    main_app.run(debug=False, host="0.0.0.0", port=8003)
