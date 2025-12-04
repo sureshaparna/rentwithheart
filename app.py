@@ -25,6 +25,7 @@ data["inside_vic"] = data["State"].apply(lambda x: "Only Victorian support organ
 
 # MAIN APP
 main_app = Flask(__name__, template_folder='templates', static_folder='static')
+server = main_app
 
 @main_app.route('/')
 def home():
