@@ -142,7 +142,7 @@ def update_forcasted_graph(housing_type_value, region_value):
     )
 
     fig.update_layout(
-        title=f"Forecasted Median Rental Price Change of <br><b>{housing_type_value}'s</b> in <br><b>{region_value}</b>",
+        title=f"Forecasted Median Rental Price Change of <br><b>{housing_type_value}'s</b> in <b>{region_value}</b>",
         xaxis=dict(
             title="Forecasted Change (%) of Rent",
             range=[math.floor(suburb_df["forecast_change"].min()), math.ceil(suburb_df["forecast_change"].max())]
