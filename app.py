@@ -45,10 +45,11 @@ def procedure():
 
 @main_app.route('/suburb/<int:Number>')
 def suburb_historicaldata(Number):
-    if (Number > 0) and (Number <= 7):
-        return render_template(f'historical_trends/subdat{str(Number)}.html')
-    else:
-        return render_template('suburb_forecast.html')
+    return render_template(f'historical_trends/subdat{str(Number)}.html')
+
+@main_app.route('/forecast')
+def suburb_forecast():
+    return render_template('suburb_forecast.html')
 
 @main_app.route('/support')
 def support():
@@ -271,13 +272,8 @@ def update_forcasted_graph(housing_type_value, region_value):
 
     fig = go.Figure()
     fig.add_trace(
-        go.Bar(
-            x=suburb_df["plot_value"],
-            y=suburb_df["suburb"],
-            orientation="h",
-            marker=dict(color=colors, opacity=0.7),
-            customdata=suburb_df["forecast_change"],
-            hovertemplate="%{y}<br>Change: %{customdata:.2f}%<extra></extra>"
+        go.Bar(x=suburb_df["plot_value"], y=suburb_df["suburb"], orientation="h", marker=dict(color=colors, opacity=0.7),
+            customdata=suburb_df["forecast_change"], hovertemplate="%{y}<br>Change: %{customdata:.2f}%<extra></extra>"
         )
     )
 
@@ -287,10 +283,8 @@ def update_forcasted_graph(housing_type_value, region_value):
             title="Forecasted Change (%) of Rent",
             range=[math.floor(suburb_df["forecast_change"].min()), math.ceil(suburb_df["forecast_change"].max())]
         ),
-        yaxis=dict(title="Suburb"),
-        template="simple_white"
+        yaxis=dict(title="Suburb"), template="simple_white"
     )
-
     return fig
 
 
