@@ -1,4 +1,5 @@
 # Importing Libraries
+import math
 import pandas as pd
 from dash import Dash, dcc, html, Input, Output
 import plotly.graph_objects as go
@@ -10,6 +11,10 @@ plot_config = {"modeBarButtonsToRemove": ["zoom2d", "pan2d", "select2d", "lasso2
 
 # Reading Data File
 historical_data = pd.read_csv(r"data/historical forcast/historical_forcast_cleaned.csv")
+historical_data["Median"] = pd.to_numeric(historical_data["Median"])
+historical_data["Count"] = pd.to_numeric(historical_data["Count"])
+historical_data["timestamp"] = pd.to_datetime(historical_data["timestamp"])
+
 
 # Webpage HTML
 app = Dash(__name__, external_stylesheets=[dbc.themes.FLATLY])
@@ -56,9 +61,6 @@ def update_historical_trend(housing_type_value, suburb_value):
     df = historical_data.copy()
     df = df[(df["type"] == housing_type_value) & (df["suburb"] == suburb_value)]
 
-    df["Count"] = pd.to_numeric(df["Count"])
-    df["Median"] = pd.to_numeric(df["Median"])
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
     df["DateLabel"] = df["timestamp"].dt.strftime("%b-%Y")
     df = df.sort_values("timestamp")
 
@@ -99,17 +101,26 @@ def update_forcasted_graph(housing_type_value, region_value):
     df = historical_data.copy()
     df = df[(df["type"] == housing_type_value) & (df["region"] == region_value)]
 
-    df["Median"] = pd.to_numeric(df["Median"])
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
-
     results = []
     for suburb in sorted(df["suburb"].unique()):
         sub_df = df[df["suburb"] == suburb]
         sub_df = sub_df.sort_values(["timestamp"])
 
         y = sub_df["Median"].values
-        model = SARIMAX(y, order=(1, 1, 1), seasonal_order=(1, 1, 1, 4), enforce_stationarity=False, enforce_invertibility=False)
-        fit = model.fit(disp=False)
+
+        if len(y) < 6:
+            results.append({"suburb": suburb, "forecast_change": 0})
+            continue
+
+        model = SARIMAX(
+            y,
+            order=(1, 1, 0),
+            seasonal_order=(0, 0, 0, 0),
+            enforce_stationarity=False,
+            enforce_invertibility=False
+        )
+
+        fit = model.fit(disp=False, maxiter=200)
         forecast = fit.get_forecast(steps=1).predicted_mean
 
         next_quarter_forecast = forecast[0]
@@ -119,18 +130,37 @@ def update_forcasted_graph(housing_type_value, region_value):
         results.append({"suburb": suburb, "forecast_change": pct_change})
 
     suburb_df = pd.DataFrame(results)
-    colors = ["green" if change >= 0 else "red" for change in suburb_df["forecast_change"]]
+    suburb_df["plot_value"] = suburb_df["forecast_change"].apply(lambda x: 0.1 if abs(x) < 0.05 else x)
+
+    colors = [
+        "green" if change > 0 else
+        "red" if change < 0 else
+        "gray"
+        for change in suburb_df["forecast_change"]
+    ]
 
     fig = go.Figure()
     fig.add_trace(
-        go.Bar(x=suburb_df["forecast_change"], y=suburb_df["suburb"], orientation="h", marker=dict(color=colors, opacity=0.7))
+        go.Bar(
+            x=suburb_df["plot_value"],
+            y=suburb_df["suburb"],
+            orientation="h",
+            marker=dict(color=colors, opacity=0.7),
+            customdata=suburb_df["forecast_change"],
+            hovertemplate="%{y}<br>Change: %{customdata:.2f}%<extra></extra>"
+        )
     )
+
     fig.update_layout(
-        title=f"Forecasted Median Rental Price Change of <br><b>{housing_type_value}'s</b> in <br><b>{region_value}, Victoria</b>",
-        xaxis=dict(title="Forecasted Change (%) of Rent", range=[suburb_df["forecast_change"].min()-3, suburb_df["forecast_change"].max()+3]),
+        title=f"Forecasted Median Rental Price Change of <br><b>{housing_type_value}'s</b> in <br><b>{region_value}</b>",
+        xaxis=dict(
+            title="Forecasted Change (%) of Rent",
+            range=[math.floor(suburb_df["forecast_change"].min()), math.ceil(suburb_df["forecast_change"].max())]
+        ),
         yaxis=dict(title="Suburb"),
         template="simple_white"
     )
+
     return fig
 
 
