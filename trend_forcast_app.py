@@ -24,15 +24,15 @@ app.layout = html.Div(children=[
 
     html.Div(children=[
         html.Div([
+            html.P("Select Preferred Suburb", style={"fontSize": "16px", "fontWeight": "bold", "margin": "0px", "padding": "0px"}),
+            dcc.Dropdown(id="suburb_dropdown", searchable=True, value="Clayton",
+                options=[{'label': val.capitalize(), 'value': val} for val in sorted(historical_data["suburb"].unique())]),
+        ], style={"width": "100%"}),
+        html.Div([
             html.P("Select Housing Type", style={"fontSize": "16px", "fontWeight": "bold", "margin": "0px", "padding": "0px"}),
             dcc.Dropdown(id="housing_type_dropdown", searchable=False, value=historical_data["type"].unique()[0],
                 options=[{'label': val.capitalize(), 'value': val} for val in sorted(historical_data["type"].unique())]
             )
-        ], style={"width": "100%"}),
-        html.Div([
-            html.P("Select Preferred Suburb", style={"fontSize": "16px", "fontWeight": "bold", "margin": "0px", "padding": "0px"}),
-            dcc.Dropdown(id="suburb_dropdown", searchable=True, value="Clayton",
-                options=[{'label': val.capitalize(), 'value': val} for val in sorted(historical_data["suburb"].unique())]),
         ], style={"width": "100%"}),
         html.Div([
             html.P("Select Victorian Region", style={"fontSize": "16px", "fontWeight": "bold", "margin": "0px", "padding": "0px"}),
@@ -58,8 +58,7 @@ app.layout = html.Div(children=[
     [Input("housing_type_dropdown", "value"), Input("suburb_dropdown", "value")]
 )
 def update_historical_trend(housing_type_value, suburb_value):
-    df = historical_data.copy()
-    df = df[(df["type"] == housing_type_value) & (df["suburb"] == suburb_value)]
+    df = historical_data[(historical_data["type"] == housing_type_value) & (historical_data["suburb"] == suburb_value)]
 
     df["DateLabel"] = df["timestamp"].dt.strftime("%b-%Y")
     df = df.sort_values("timestamp")
@@ -88,8 +87,7 @@ def update_historical_trend(housing_type_value, suburb_value):
     Input("suburb_dropdown", "value")
 )
 def update_region_dropdown(suburb_value):
-    df = historical_data.copy()
-    df = df[df["suburb"] == suburb_value]
+    df = historical_data[historical_data["suburb"] == suburb_value]
     return df["region"].unique()[0]
 
 
@@ -98,8 +96,7 @@ def update_region_dropdown(suburb_value):
     [Input("housing_type_dropdown", "value"), Input("region_dropdown", "value")]
 )
 def update_forcasted_graph(housing_type_value, region_value):
-    df = historical_data.copy()
-    df = df[(df["type"] == housing_type_value) & (df["region"] == region_value)]
+    df = historical_data[(historical_data["type"] == housing_type_value) & (historical_data["region"] == region_value)]
 
     results = []
     for suburb in sorted(df["suburb"].unique()):
@@ -112,14 +109,7 @@ def update_forcasted_graph(housing_type_value, region_value):
             results.append({"suburb": suburb, "forecast_change": 0})
             continue
 
-        model = SARIMAX(
-            y,
-            order=(1, 1, 0),
-            seasonal_order=(0, 0, 0, 0),
-            enforce_stationarity=False,
-            enforce_invertibility=False
-        )
-
+        model = SARIMAX(y, order=(1, 1, 0), seasonal_order=(0, 0, 0, 0), enforce_stationarity=False, enforce_invertibility=False)
         fit = model.fit(disp=False, maxiter=200)
         forecast = fit.get_forecast(steps=1).predicted_mean
 
