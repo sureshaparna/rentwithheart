@@ -1,8 +1,8 @@
 #Importing Libraries
+import math
 import pandas as pd
 import geopandas as gpd
 import plotly.express as px
-from plotly.express import data
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 from dash import Dash, dcc, html, dash_table, Input, Output
@@ -19,8 +19,12 @@ recommender_data = pd.read_csv(r"data/suburb recommendor/final_suburb_recommendo
 recommender_data = recommender_data.fillna("")
 
 historical_data = pd.read_csv(r"data/historical forcast/historical_forcast_cleaned.csv")
-data = pd.read_csv(r"data/support_charity.csv")
-data["inside_vic"] = data["State"].apply(lambda x: "Only Victorian support organisations" if x in ['Victoria', 'VIC','Vic', 'victoria', 'St Helena Victoria', 'VICTORIA', 'Benalla Victoria', 'vic' 'Victoria,', 'VIC ', 'Victora'] else "Support organisations that operate across Australia including Victoria")
+historical_data["Median"] = pd.to_numeric(historical_data["Median"])
+historical_data["Count"] = pd.to_numeric(historical_data["Count"])
+historical_data["timestamp"] = pd.to_datetime(historical_data["timestamp"])
+
+charity_data = pd.read_csv(r"data/support_charity.csv")
+charity_data["inside_vic"] = charity_data["State"].apply(lambda x: "Only Victorian support organisations" if x in ['Victoria', 'VIC','Vic', 'victoria', 'St Helena Victoria', 'VICTORIA', 'Benalla Victoria', 'vic' 'Victoria,', 'VIC ', 'Victora'] else "Support organisations that operate across Australia including Victoria")
 
 
 # MAIN APP
@@ -106,7 +110,7 @@ suburb_recommender_app.layout = html.Div(children=[
     [Input("housing_type_dropdown", "value"), Input("budget_dropdown", "value"), Input("school_dropdown", "value")]
 )
 def update_filter_table(housing_type, budget, school_type):
-    df = recommender_data.copy()
+    df = recommender_data
     df["Latest_Median"] = pd.to_numeric(df["Latest_Median"])
 
     df = df[(df["Housing_Type"] == housing_type) & (df["Latest_Median"] <= budget) & (df["School_Type"].isin(list(school_type)))]
@@ -124,7 +128,7 @@ def update_filter_table(housing_type, budget, school_type):
     Input("housing_type_dropdown", "value")
 )
 def update_map(housing_type):
-    df = recommender_data.copy()
+    df = recommender_data
     df = df[df["Housing_Type"] == housing_type]
     df = df[["suburb", "Latest_Median", "Forecasted_Next_Quarter"]]
     df = df.rename(columns={"suburb": "Suburb", "Latest_Median": "Median Rent", "Forecasted_Next_Quarter": "Forecasted Rent"})
@@ -163,22 +167,22 @@ forecast_app.layout = html.Div(children=[
 
     html.Div(children=[
         html.Div([
+            html.P("Select Preferred Suburb", style={"fontSize": "16px", "fontWeight": "bold", "margin": "0px", "padding": "0px"}),
+            dcc.Dropdown(id="suburb_dropdown", searchable=True, value="Clayton",
+                options=[{'label': val.capitalize(), 'value': val} for val in sorted(historical_data["suburb"].unique())]),
+        ], style={"width": "100%"}),
+        html.Div([
             html.P("Select Housing Type", style={"fontSize": "16px", "fontWeight": "bold", "margin": "0px", "padding": "0px"}),
             dcc.Dropdown(id="housing_type_dropdown", searchable=False, value=historical_data["type"].unique()[0],
                 options=[{'label': val.capitalize(), 'value': val} for val in sorted(historical_data["type"].unique())]
             )
         ], style={"width": "100%"}),
         html.Div([
-            html.P("Select Preferred Suburb", style={"fontSize": "16px", "fontWeight": "bold", "margin": "0px", "padding": "0px"}),
-            dcc.Dropdown(id="suburb_dropdown", searchable=True, value="Clayton",
-                options=[{'label': val.capitalize(), 'value': val} for val in sorted(historical_data["suburb"].unique())]),
-        ], style={"width": "100%"}),
-        html.Div([
             html.P("Select Victorian Region", style={"fontSize": "16px", "fontWeight": "bold", "margin": "0px", "padding": "0px"}),
             dcc.Dropdown(id="region_dropdown", searchable=False, value="Inner Eastern Melbourne",
                 options=[{'label': val.capitalize(), 'value': val} for val in historical_data["region"].unique()]
             )
-        ], style={"width": "100%"}),
+        ], style={"width": "100%"})
     ], style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "space-around", "gap": "30px", "margin": "10px 30px"}),
 
     html.Div(children=[
@@ -196,12 +200,8 @@ forecast_app.layout = html.Div(children=[
     [Input("housing_type_dropdown", "value"), Input("suburb_dropdown", "value")]
 )
 def update_historical_trend(housing_type_value, suburb_value):
-    df = historical_data.copy()
-    df = df[(df["type"] == housing_type_value) & (df["suburb"] == suburb_value)]
+    df = historical_data[(historical_data["type"] == housing_type_value) & (historical_data["suburb"] == suburb_value)]
 
-    df["Count"] = pd.to_numeric(df["Count"])
-    df["Median"] = pd.to_numeric(df["Median"])
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
     df["DateLabel"] = df["timestamp"].dt.strftime("%b-%Y")
     df = df.sort_values("timestamp")
 
@@ -228,8 +228,7 @@ def update_historical_trend(housing_type_value, suburb_value):
     Input("suburb_dropdown", "value")
 )
 def update_region_dropdown(suburb_value):
-    df = historical_data.copy()
-    df = df[df["suburb"] == suburb_value]
+    df = historical_data[historical_data["suburb"] == suburb_value]
     return df["region"].unique()[0]
 
 @forecast_app.callback(
@@ -237,11 +236,7 @@ def update_region_dropdown(suburb_value):
     [Input("housing_type_dropdown", "value"), Input("region_dropdown", "value")]
 )
 def update_forcasted_graph(housing_type_value, region_value):
-    df = historical_data.copy()
-    df = df[(df["type"] == housing_type_value) & (df["region"] == region_value)]
-
-    df["Median"] = pd.to_numeric(df["Median"])
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df = historical_data[(historical_data["type"] == housing_type_value) & (historical_data["region"] == region_value)]
 
     results = []
     for suburb in sorted(df["suburb"].unique()):
@@ -249,8 +244,13 @@ def update_forcasted_graph(housing_type_value, region_value):
         sub_df = sub_df.sort_values(["timestamp"])
 
         y = sub_df["Median"].values
-        model = SARIMAX(y, order=(1, 1, 1), seasonal_order=(1, 1, 1, 4), enforce_stationarity=False, enforce_invertibility=False)
-        fit = model.fit(disp=False)
+
+        if len(y) < 6:
+            results.append({"suburb": suburb, "forecast_change": 0})
+            continue
+
+        model = SARIMAX(y, order=(1, 1, 0), seasonal_order=(0, 0, 0, 0), enforce_stationarity=False, enforce_invertibility=False)
+        fit = model.fit(disp=False, maxiter=200)
         forecast = fit.get_forecast(steps=1).predicted_mean
 
         next_quarter_forecast = forecast[0]
@@ -260,18 +260,37 @@ def update_forcasted_graph(housing_type_value, region_value):
         results.append({"suburb": suburb, "forecast_change": pct_change})
 
     suburb_df = pd.DataFrame(results)
-    colors = ["green" if change >= 0 else "red" for change in suburb_df["forecast_change"]]
+    suburb_df["plot_value"] = suburb_df["forecast_change"].apply(lambda x: 0.1 if abs(x) < 0.05 else x)
+
+    colors = [
+        "green" if change > 0 else
+        "red" if change < 0 else
+        "gray"
+        for change in suburb_df["forecast_change"]
+    ]
 
     fig = go.Figure()
     fig.add_trace(
-        go.Bar(x=suburb_df["forecast_change"], y=suburb_df["suburb"], orientation="h", marker=dict(color=colors, opacity=0.7))
+        go.Bar(
+            x=suburb_df["plot_value"],
+            y=suburb_df["suburb"],
+            orientation="h",
+            marker=dict(color=colors, opacity=0.7),
+            customdata=suburb_df["forecast_change"],
+            hovertemplate="%{y}<br>Change: %{customdata:.2f}%<extra></extra>"
+        )
     )
+
     fig.update_layout(
-        title=f"Forecasted Median Rental Price Change of <br><b>{housing_type_value}'s</b> in <br><b>{region_value}, Victoria</b>",
-        xaxis=dict(title="Forecasted Change (%) of Rent", range=[suburb_df["forecast_change"].min()-3, suburb_df["forecast_change"].max()+3]),
+        title=f"Forecasted Median Rental Price Change of <br><b>{housing_type_value}'s</b> in <br><b>{region_value}</b>",
+        xaxis=dict(
+            title="Forecasted Change (%) of Rent",
+            range=[math.floor(suburb_df["forecast_change"].min()), math.ceil(suburb_df["forecast_change"].max())]
+        ),
         yaxis=dict(title="Suburb"),
         template="simple_white"
     )
+
     return fig
 
 
@@ -290,8 +309,8 @@ support_app.layout = html.Div(children=[
 
     dcc.RadioItems(
         id='radio-filter',
-        options=[{'label': i, 'value': i} for i in data['inside_vic'].unique()],
-        value=data['inside_vic'].unique()[0],
+        options=[{'label': i, 'value': i} for i in charity_data['inside_vic'].unique()],
+        value=charity_data['inside_vic'].unique()[0],
         labelStyle={'display': 'inline-block', 'margin-right': '20px'},
         inputStyle={'margin-right': '10px'},
         style={'textAlign': 'center'}
@@ -321,9 +340,9 @@ support_app.layout = html.Div(children=[
 )
 def update_dropdown(value):
     if (value == "Only Victorian organisations"):
-        filtered_data = data[data['inside_vic'] == value]
+        filtered_data = charity_data[charity_data['inside_vic'] == value]
     else:
-        filtered_data = data
+        filtered_data = charity_data
     list_of_suburbs = sorted([str(suburb) for suburb in filtered_data["Town_City"].unique()])
     options = [{'label': str(suburb), 'value': str(suburb)} for suburb in list_of_suburbs]
     return options
@@ -336,7 +355,7 @@ def update_table(value):
     final_df = pd.DataFrame(columns=["Name", "Website", "Type", "E-mail", "Phone number"])
 
     if ((value is not None) and (len(value) != 0)):
-        filtered_df = data[data["Town_City"].isin(value)]
+        filtered_df = charity_data[charity_data["Town_City"].isin(value)]
         filtered_df = filtered_df[
             ['Charity_Legal_Name', 'Charity_Website', 'Advancing_Education', 'Promoting_or_protecting_human_rights',
              'Advancing_social_or_public_welfare', 'Children', 'Families', 'Females', 'Financially_Disadvantaged',
