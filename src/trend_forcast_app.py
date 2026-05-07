@@ -10,7 +10,7 @@ plot_config = {"modeBarButtonsToRemove": ["zoom2d", "pan2d", "select2d", "lasso2
                "staticPlot": False, "displaylogo": False}
 
 # Reading Data File
-historical_data = pd.read_csv(r"data/historical forcast/historical_forcast_cleaned.csv")
+historical_data = pd.read_csv(r"Data/historical forcast/historical_forcast_cleaned.csv")
 historical_data["Median"] = pd.to_numeric(historical_data["Median"])
 historical_data["Count"] = pd.to_numeric(historical_data["Count"])
 historical_data["timestamp"] = pd.to_datetime(historical_data["timestamp"])

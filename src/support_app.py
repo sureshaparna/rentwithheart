@@ -5,8 +5,8 @@ from dash import Dash, dcc, html, Input, Output
 import dash_bootstrap_components as dbc
 
 # Reading Data File
-data = pd.read_csv(r"data/support_charity.csv")
-data["inside_vic"] = data["State"].apply(lambda x: "Only Victorian support organisations" if x in ['Victoria', 'VIC','Vic', 'victoria', 'St Helena Victoria', 'VICTORIA', 'Benalla Victoria', 'vic' 'Victoria,', 'VIC ', 'Victora'] else "Support organisations that operate across Australia including Victoria")
+charity_data = pd.read_csv(r"Data/support_charity.csv")
+charity_data["inside_vic"] = charity_data["State"].apply(lambda x: "Only Victorian support organisations" if x in ['Victoria', 'VIC','Vic', 'victoria', 'St Helena Victoria', 'VICTORIA', 'Benalla Victoria', 'vic' 'Victoria,', 'VIC ', 'Victora'] else "Support organisations that operate across Australia including Victoria")
 
 # Webpage HTML
 app = Dash(__name__, external_stylesheets=[dbc.themes.FLATLY])
@@ -24,8 +24,8 @@ app.layout = html.Div(children=[
     
     dcc.RadioItems(
         id='radio-filter',
-        options=[{'label': i, 'value': i} for i in data['inside_vic'].unique()],
-        value = data['inside_vic'].unique()[0],
+        options=[{'label': i, 'value': i} for i in charity_data['inside_vic'].unique()],
+        value = charity_data['inside_vic'].unique()[0],
         labelStyle={'display': 'inline-block', 'margin-right': '20px'},
         inputStyle={'margin-right': '10px'},
         style = {'textAlign':'center'}
@@ -54,9 +54,9 @@ app.layout = html.Div(children=[
 )
 def update_dropdown(value):
     if(value == "Only Victorian organisations"):
-        filtered_data = data[data['inside_vic'] == value]
+        filtered_data = charity_data[charity_data['inside_vic'] == value]
     else:
-        filtered_data = data
+        filtered_data = charity_data
     list_of_suburbs = sorted([str(suburb) for suburb in filtered_data["Town_City"].unique()])
     options = [{'label': str(suburb), 'value': str(suburb)} for suburb in list_of_suburbs]
     return options
@@ -70,7 +70,7 @@ def update_table(value):
     final_df = pd.DataFrame(columns=["Name", "Website", "Type", "E-mail", "Phone number"])
 
     if((value is not None) and (len(value) != 0)):
-        filtered_df = data[data["Town_City"].isin(value)]
+        filtered_df = charity_data[charity_data["Town_City"].isin(value)]
         filtered_df = filtered_df[['Charity_Legal_Name', 'Charity_Website', 'Advancing_Education', 'Promoting_or_protecting_human_rights', 'Advancing_social_or_public_welfare', 'Children', 'Families', 'Females', 'Financially_Disadvantaged', 'Males', 'People_at_risk_of_homelessness', 'email', 'contact']]
 
         for index, row in filtered_df.iterrows():

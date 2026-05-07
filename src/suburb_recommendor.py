@@ -9,8 +9,8 @@ plot_config = {"modeBarButtonsToRemove": ["zoom2d", "pan2d", "select2d", "lasso2
                "staticPlot": False, "displaylogo": False}
 
 # Reading Data File
-suburb_df = gpd.read_file("data/suburb recommendor/VIC_LOC_GDA94/vic_localities.shp")
-recommender_data = pd.read_csv(r"data/suburb recommendor/final_suburb_recommendor_cleaned.csv")
+suburb_df = gpd.read_file("Data/suburb recommendor/VIC_LOC_GDA94/vic_localities.shp")
+recommender_data = pd.read_csv(r"Data/suburb recommendor/final_suburb_recommendor_cleaned.csv")
 recommender_data = recommender_data.fillna("")
 
 # Webpage HTML
@@ -20,7 +20,6 @@ app.layout = html.Div(children=[
     html.P("Suburb Recommender", style={"textAlign": "center", "fontSize": "40px", "fontWeight": "bold", "margin": "0px", "padding": "0px"}),
 
     html.Div(children=[
-
         html.Div(children=[
             html.Div(children=[
                 html.P("Select Preferred Housing Type", style={"fontWeight": "bold", "margin": "0px", "padding": "0px"}),
@@ -30,7 +29,6 @@ app.layout = html.Div(children=[
                              if val != ""], style={"width": "100%"}
                 )
             ]),
-
             html.Div(children=[
                 html.P("Select Preferred Weekly Budget ($)", style={"fontWeight": "bold", "margin": "0px", "padding": "0px"}),
                 dcc.Dropdown(id="budget_dropdown", searchable=False, value=400,
@@ -38,7 +36,6 @@ app.layout = html.Div(children=[
                              for val in range(100, 1050, 100)], style={"width": "100%"}
                 )
             ]),
-
             html.Div(children=[
                 html.P("Select Required School Type", style={"fontWeight": "bold", "margin": "0px", "padding": "0px"}),
                 dcc.Dropdown(id="school_dropdown", searchable=False, multi=True, value=["Primary", "Secondary", "Pri/Sec"],
@@ -47,26 +44,19 @@ app.layout = html.Div(children=[
                              if val != ""], style={"width": "100%"}
                 )
             ])
-        ], style={"height": "100%", "maxWidth": "20%", "minWidth": "20%", "display": "flex", "flexDirection": "column", "justifyContent": "space-between", "gap": "auto"}),
+        ], style={"height": "100%", "Width": "20%", "display": "flex", "flexDirection": "column", "justifyContent": "space-between", "gap": "auto"}),
 
-        html.Div(children=[
-            dash_table.DataTable(id="filter_table", fixed_rows={"headers": True}, page_action="none",
-                style_table={"width": "100%", "overflowY": "scroll"},
-                style_header={"whiteSpace": "normal", "fontWeight": "bold", "fontSize": "14px", "textAlign": "center"},
-                style_cell={"minWidth": "150px", "width": "150px", "maxWidth": "180px",
-                            "whiteSpace": "normal", "height": "auto", "fontSize": "10px", "textAlign": "center"}
-            )
-        ], style={"flex": "1", "height": "100%", "overflow": "hidden"})
-    ], style={"height": "calc(100vh - 50vh - 40px - 50px)", "display": "flex", "flexDirection": "row", "gap": "10px"}),
+        html.Div(id="filter_table", className="filter_table", style={"flex": "1", "overflow": "auto"})
+    ], style={"height": "40vh", "display": "flex", "flexDirection": "row", "gap": "10px"}),
 
     html.Div(children=[
-        dcc.Graph(id="map", config=plot_config, style={"height": "50vh", "width": "100%", "padding": "0", "margin": "0"})
-    ], style={"width": "100%"})
-], style={"display": "flex", "flexDirection": "column", "gap": "10px", "backgroundColor": "#EAE8DC", "minHeight": "100vh", "padding": "0px 10px 10px 10px"})
+        dcc.Graph(id="map", config=plot_config, style={"height": "100%", "padding": "0", "margin": "0"})
+    ], style={"flex": "1", "minHeight": "0", "width": "100%"})
+], style={"display": "flex", "flexDirection": "column", "gap": "10px", "backgroundColor": "#EAE8DC", "height": "100vh", "padding": "0px 10px 10px 10px"})
 
 
 @app.callback(
-    [Output("filter_table", "columns"), Output("filter_table", "data")],
+    Output("filter_table", "children"),
     [Input("housing_type_dropdown", "value"), Input("budget_dropdown", "value"), Input("school_dropdown", "value")]
 )
 def update_filter_table(housing_type, budget, school_type):
@@ -80,8 +70,17 @@ def update_filter_table(housing_type, budget, school_type):
         "MODE": "Mode of Transport", "stop_count": "No. of Stops",
         "Latest_Median": "Median Rent", "Forecasted_Next_Quarter": "Forecasted Rent"
     })
+    df["Median Rent"] = "$" + df["Median Rent"].astype(int).astype(str)
+    df["Forecasted Rent"] = "$" + df["Forecasted Rent"].astype(int).astype(str)
 
-    return [{"name": i, "id": i} for i in df.columns], df.to_dict("records")
+    fig = dash_table.DataTable(fixed_rows={"headers": True}, page_action="none",
+            columns=[{"name": i, "id": i} for i in df.columns], data=df.to_dict("records"),
+            style_table={"width": "100%", "maxHeight": "40vh", "overflowY": "auto", "overflowX": "auto"},
+            style_header={"whiteSpace": "normal", "fontWeight": "bold", "fontSize": "14px", "textAlign": "center", "backgroundColor": "#2F4858", "color": "white"},
+            style_cell={"minWidth": "150px", "width": "150px", "maxWidth": "180px", "whiteSpace": "normal", "height": "auto", "fontSize": "10px", "textAlign": "center"}
+        )
+
+    return fig
 
 
 @app.callback(
