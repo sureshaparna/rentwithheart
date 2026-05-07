@@ -100,9 +100,12 @@ suburb_recommender_app.layout = html.Div(children=[
 )
 def update_filter_table(housing_type, budget, school_type):
     df = recommender_data
-    df["Latest_Median"] = pd.to_numeric(df["Latest_Median"])
 
-    df = df[(df["Housing_Type"] == housing_type) & (df["Latest_Median"] <= budget) & (df["School_Type"].isin(list(school_type)))]
+    df["Latest_Median"] = pd.to_numeric(df["Latest_Median"])
+    df = df[(df["Housing_Type"] == housing_type) & (df["Latest_Median"] <= budget)]
+    if len(school_type) > 0:
+        df = df[df["School_Type"].isin(list(school_type))]
+
     df = df[["region", "suburb", "Housing_Type", "School_Type", "school_count", "MODE", "stop_count", "Latest_Median", "Forecasted_Next_Quarter"]]
     df = df.rename(columns={"region": "Region", "suburb": "Suburb",
         "Housing_Type": "Housing Type", "School_Type": "School Type", "school_count": "No. of Schools",
