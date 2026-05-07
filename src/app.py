@@ -14,7 +14,7 @@ plot_config = {"modeBarButtonsToRemove": ["zoom2d", "pan2d", "select2d", "lasso2
                "staticPlot": False, "displaylogo": False}
 
 #Reading Data File
-suburb_df = gpd.read_file("Data/suburb recommendor/VIC_LOC_GDA94/vic_localities.shp")
+suburb_df = gpd.read_file(r"Data/suburb recommendor/VIC_LOC_GDA94/vic_localities.shp")
 recommender_data = pd.read_csv(r"Data/suburb recommendor/final_suburb_recommendor_cleaned.csv")
 recommender_data = recommender_data.fillna("")
 
