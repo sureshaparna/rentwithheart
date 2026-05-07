@@ -1,4 +1,5 @@
 #Importing Libraries
+import os
 import math
 import pandas as pd
 import geopandas as gpd
@@ -14,16 +15,17 @@ plot_config = {"modeBarButtonsToRemove": ["zoom2d", "pan2d", "select2d", "lasso2
                "staticPlot": False, "displaylogo": False}
 
 #Reading Data File
-suburb_df = gpd.read_file(r"Data/suburb recommendor/VIC_LOC_GDA94/vic_localities.shp")
-recommender_data = pd.read_csv(r"Data/suburb recommendor/final_suburb_recommendor_cleaned.csv")
+BASE_DIR = os.path.dirname(__file__)
+suburb_df = gpd.read_file(os.path.join(BASE_DIR, "Data/suburb recommendor/VIC_LOC_GDA94/vic_localities.shp"))
+recommender_data = pd.read_csv(os.path.join(BASE_DIR, "Data/suburb recommendor/final_suburb_recommendor_cleaned.csv"))
 recommender_data = recommender_data.fillna("")
 
-historical_data = pd.read_csv(r"Data/historical forcast/historical_forcast_cleaned.csv")
+historical_data = pd.read_csv(os.path.join(BASE_DIR, "Data/historical forcast/historical_forcast_cleaned.csv"))
 historical_data["Median"] = pd.to_numeric(historical_data["Median"])
 historical_data["Count"] = pd.to_numeric(historical_data["Count"])
 historical_data["timestamp"] = pd.to_datetime(historical_data["timestamp"])
 
-charity_data = pd.read_csv(r"Data/support_charity.csv")
+charity_data = pd.read_csv(os.path.join(BASE_DIR, "Data/support_charity.csv"))
 charity_data["inside_vic"] = charity_data["State"].apply(lambda x: "Only Victorian support organisations" if x in ['Victoria', 'VIC','Vic', 'victoria', 'St Helena Victoria', 'VICTORIA', 'Benalla Victoria', 'vic' 'Victoria,', 'VIC ', 'Victora'] else "Support organisations that operate across Australia including Victoria")
 
 
