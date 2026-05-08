@@ -84,7 +84,7 @@ suburb_recommender_app.layout = html.Div(children=[
                              if val != ""], style={"width": "100%"}
                 )
             ])
-        ], style={"height": "100%", "Width": "20%", "display": "flex", "flexDirection": "column", "justifyContent": "space-between", "gap": "auto"}),
+        ], style={"height": "100%", "maxWidth": "20%", "minWidth": "20%", "display": "flex", "flexDirection": "column", "justifyContent": "space-between", "gap": "auto"}),
 
         html.Div(id="filter_table", className="filter_table", style={"flex": "1", "overflow": "auto"})
     ], style={"height": "40vh", "display": "flex", "flexDirection": "row", "gap": "10px"}),
